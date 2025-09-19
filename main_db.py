@@ -135,6 +135,13 @@ async def get_users(current_user = Depends(get_current_user), db: Session = Depe
     users = db.query(UserModel).all()
     return users
 
+# Public endpoint for demo purposes
+@app.get("/api/users", response_model=List[UserResponse])
+async def get_users_public(db: Session = Depends(get_db)):
+    from database import User as UserModel
+    users = db.query(UserModel).all()
+    return users
+
 @app.get("/items", response_model=List[ItemResponse])
 async def get_items(current_user = Depends(get_current_user), db: Session = Depends(get_db)):
     items = db.query(ItemModel).all()

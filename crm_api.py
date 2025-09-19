@@ -936,6 +936,92 @@ async def get_orders(
 
     return orders_response
 
+@router.get("/orders/search")
+def search_orders(
+    status: Optional[str] = Query(None, description="Filter by order status"),
+    client_phone: Optional[str] = Query(None, description="Filter by client phone"),
+    executor_id: Optional[int] = Query(None, description="Filter by assigned florist"),
+    date_from: Optional[date] = Query(None, description="Filter orders from date (YYYY-MM-DD)"),
+    date_to: Optional[date] = Query(None, description="Filter orders to date (YYYY-MM-DD)"),
+    min_price: Optional[float] = Query(None, description="Minimum order price"),
+    max_price: Optional[float] = Query(None, description="Maximum order price"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    """Advanced order search with filters"""
+    query_builder = db.query(Order)
+
+    # Filter by status
+    if status:
+        query_builder = query_builder.filter(Order.status == status)
+
+    # Filter by client phone
+    if client_phone:
+        query_builder = query_builder.join(Client, Order.client_id == Client.id).filter(Client.phone.ilike(f"%{client_phone}%"))
+
+    # Filter by executor
+    if executor_id:
+        query_builder = query_builder.filter(Order.executor_id == executor_id)
+
+    # Filter by date range
+    if date_from:
+        query_builder = query_builder.filter(Order.delivery_date >= date_from)
+    if date_to:
+        query_builder = query_builder.filter(Order.delivery_date <= date_to)
+
+    # Filter by price range
+    if min_price:
+        query_builder = query_builder.filter(Order.total_price >= min_price)
+    if max_price:
+        query_builder = query_builder.filter(Order.total_price <= max_price)
+
+    # Count total
+    total = query_builder.count()
+
+    # Apply pagination and ordering
+    offset = (page - 1) * page_size
+    orders = query_builder.order_by(Order.created_at.desc()).offset(offset).limit(page_size).all()
+
+    # Format response with full order details
+    formatted_orders = []
+    for order in orders:
+        formatted_orders.append({
+            "id": order.id,
+            "client_id": order.client_id,
+            "recipient_id": order.recipient_id,
+            "executor_id": order.executor_id,
+            "status": order.status,
+            "delivery_date": order.delivery_date,
+            "delivery_address": order.delivery_address,
+            "total_price": order.total_price,
+            "comment": order.comment,
+            "created_at": order.created_at,
+            "client": {
+                "id": order.client.id,
+                "name": order.client.name,
+                "phone": order.client.phone,
+                "client_type": order.client.client_type,
+            } if order.client else None,
+            "recipient": {
+                "id": order.recipient.id,
+                "name": order.recipient.name,
+                "phone": order.recipient.phone,
+            } if order.recipient else None,
+            "executor": {
+                "id": order.executor.id,
+                "username": order.executor.username,
+                "position": order.executor.position if hasattr(order.executor, 'position') else None,
+            } if order.executor else None,
+        })
+
+    return {
+        "orders": formatted_orders,
+        "total": total,
+        "page": page,
+        "page_size": page_size
+    }
+
 @router.get("/orders/{order_id}", response_model=OrderResponse)
 async def get_order(
     order_id: int,
@@ -1516,92 +1602,6 @@ def search_clients(
 
     return {
         "clients": clients,
-        "total": total,
-        "page": page,
-        "page_size": page_size
-    }
-
-@router.get("/orders/search")
-def search_orders(
-    status: Optional[str] = Query(None, description="Filter by order status"),
-    client_phone: Optional[str] = Query(None, description="Filter by client phone"),
-    executor_id: Optional[int] = Query(None, description="Filter by assigned florist"),
-    date_from: Optional[date] = Query(None, description="Filter orders from date (YYYY-MM-DD)"),
-    date_to: Optional[date] = Query(None, description="Filter orders to date (YYYY-MM-DD)"),
-    min_price: Optional[float] = Query(None, description="Minimum order price"),
-    max_price: Optional[float] = Query(None, description="Maximum order price"),
-    page: int = Query(1, ge=1),
-    page_size: int = Query(20, ge=1, le=100),
-    db: Session = Depends(get_db)
-):
-    """Advanced order search with filters"""
-    query_builder = db.query(Order)
-
-    # Filter by status
-    if status:
-        query_builder = query_builder.filter(Order.status == status)
-
-    # Filter by client phone
-    if client_phone:
-        query_builder = query_builder.join(Client, Order.client_id == Client.id).filter(Client.phone.ilike(f"%{client_phone}%"))
-
-    # Filter by executor
-    if executor_id:
-        query_builder = query_builder.filter(Order.executor_id == executor_id)
-
-    # Filter by date range
-    if date_from:
-        query_builder = query_builder.filter(Order.delivery_date >= date_from)
-    if date_to:
-        query_builder = query_builder.filter(Order.delivery_date <= date_to)
-
-    # Filter by price range
-    if min_price:
-        query_builder = query_builder.filter(Order.total_price >= min_price)
-    if max_price:
-        query_builder = query_builder.filter(Order.total_price <= max_price)
-
-    # Count total
-    total = query_builder.count()
-
-    # Apply pagination and ordering
-    offset = (page - 1) * page_size
-    orders = query_builder.order_by(Order.created_at.desc()).offset(offset).limit(page_size).all()
-
-    # Format response with full order details
-    formatted_orders = []
-    for order in orders:
-        formatted_orders.append({
-            "id": order.id,
-            "client_id": order.client_id,
-            "recipient_id": order.recipient_id,
-            "executor_id": order.executor_id,
-            "status": order.status,
-            "delivery_date": order.delivery_date,
-            "delivery_address": order.delivery_address,
-            "total_price": order.total_price,
-            "comment": order.comment,
-            "created_at": order.created_at,
-            "client": {
-                "id": order.client.id,
-                "name": order.client.name,
-                "phone": order.client.phone,
-                "client_type": order.client.client_type,
-            } if order.client else None,
-            "recipient": {
-                "id": order.recipient.id,
-                "name": order.recipient.name,
-                "phone": order.recipient.phone,
-            } if order.recipient else None,
-            "executor": {
-                "id": order.executor.id,
-                "username": order.executor.username,
-                "position": order.executor.position if hasattr(order.executor, 'position') else None,
-            } if order.executor else None,
-        })
-
-    return {
-        "orders": formatted_orders,
         "total": total,
         "page": page,
         "page_size": page_size
