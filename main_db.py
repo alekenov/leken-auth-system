@@ -14,6 +14,9 @@ from auth_db import (
     get_user_by_username, get_user_by_email, create_user,
     ACCESS_TOKEN_EXPIRE_MINUTES
 )
+from crm_api import router as crm_router
+from product_api import router as product_router
+from inventory_management import router as inventory_router
 
 app = FastAPI(
     title="Leken API",
@@ -23,11 +26,21 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:8888", "http://localhost:8011", "http://127.0.0.1:8888", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
+
+# Include Inventory Management router first (more specific routes)
+app.include_router(inventory_router, prefix="/api", tags=["Inventory"])
+
+# Include Enhanced Product API router
+app.include_router(product_router, prefix="/api", tags=["Products"])
+
+# Include CRM API router last (more general routes)
+app.include_router(crm_router, prefix="/api", tags=["CRM"])
 
 class ItemCreate(BaseModel):
     name: str

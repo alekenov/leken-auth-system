@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали заказа - Florist CRM</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 1;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-title {
+            color: white;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .status-badge-large {
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .status-new { background: #e3f2fd; color: #1976d2; }
+        .status-progress { background: #fff3cd; color: #856404; }
+        .status-ready { background: #e8f5e9; color: #2e7d32; }
+        .status-delivered { background: #d4edda; color: #155724; }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #333;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.75rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 400;
+            text-align: right;
+        }
+
+        .products-table {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .products-table th {
+            background: #f8f9fa;
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .products-table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .products-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .total-row {
+            font-weight: bold;
+            font-size: 1.1rem;
+            background: #f8f9fa;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 1.5rem;
+        }
+
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 0.5rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+        }
+
+        .timeline-item:after {
+            content: '';
+            position: absolute;
+            left: -1.06rem;
+            top: 1.5rem;
+            width: 2px;
+            height: calc(100% - 0.5rem);
+            background: #ddd;
+        }
+
+        .timeline-item:last-child:after {
+            display: none;
+        }
+
+        .timeline-date {
+            color: #999;
+            font-size: 0.875rem;
+        }
+
+        .timeline-content {
+            color: #333;
+            margin-top: 0.25rem;
+        }
+
+        .comment-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: white;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .action-buttons {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                Florist CRM
+            </div>
+            <div class="user-info">
+                <span id="userName">Loading...</span>
+                <button class="btn btn-secondary" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Выход
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="dashboard.html">Dashboard</a>
+            <span>/</span>
+            <a href="orders.html">Заказы</a>
+            <span>/</span>
+            <span id="breadcrumbOrderId">Заказ</span>
+        </div>
+
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+            <p>Загрузка данных заказа...</p>
+        </div>
+
+        <div id="orderContent" style="display: none;">
+            <div class="page-header">
+                <div class="page-title">
+                    <h1>Заказ #<span id="orderId"></span></h1>
+                    <span id="orderStatus" class="status-badge-large"></span>
+                </div>
+                <div class="action-buttons">
+                    <button class="btn btn-success" onclick="showStatusModal()">
+                        <i class="fas fa-edit"></i> Изменить статус
+                    </button>
+                    <button class="btn btn-primary" onclick="printOrder()">
+                        <i class="fas fa-print"></i> Печать
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteOrder()">
+                        <i class="fas fa-trash"></i> Удалить
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid-container">
+                <!-- Client Information -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-user"></i> Информация о заказчике
+                    </h2>
+                    <div class="info-row">
+                        <span class="info-label">Имя:</span>
+                        <span class="info-value" id="clientName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Телефон:</span>
+                        <span class="info-value" id="clientPhone">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value" id="clientEmail">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Адрес:</span>
+                        <span class="info-value" id="clientAddress">-</span>
+                    </div>
+                </div>
+
+                <!-- Recipient Information -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-gift"></i> Информация о получателе
+                    </h2>
+                    <div class="info-row">
+                        <span class="info-label">Имя:</span>
+                        <span class="info-value" id="recipientName">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Телефон:</span>
+                        <span class="info-value" id="recipientPhone">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Email:</span>
+                        <span class="info-value" id="recipientEmail">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Адрес доставки:</span>
+                        <span class="info-value" id="deliveryAddress">-</span>
+                    </div>
+                </div>
+
+                <!-- Delivery Information -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-truck"></i> Информация о доставке
+                    </h2>
+                    <div class="info-row">
+                        <span class="info-label">Дата доставки:</span>
+                        <span class="info-value" id="deliveryDate">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Исполнитель:</span>
+                        <span class="info-value" id="executor">Не назначен</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Создан:</span>
+                        <span class="info-value" id="createdAt">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Статус:</span>
+                        <span class="info-value" id="currentStatus">-</span>
+                    </div>
+                </div>
+
+                <!-- Order Timeline -->
+                <div class="card">
+                    <h2 class="card-title">
+                        <i class="fas fa-history"></i> История заказа
+                    </h2>
+                    <div class="timeline" id="orderTimeline">
+                        <!-- Timeline items will be added here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Products -->
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-shopping-basket"></i> Товары в заказе
+                </h2>
+                <table class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Количество</th>
+                            <th>Цена за шт.</th>
+                            <th>Сумма</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsTableBody">
+                        <!-- Products will be added here -->
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="3">Итого:</td>
+                            <td id="totalPrice">0 KZT</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <!-- Comments -->
+            <div class="card">
+                <h2 class="card-title">
+                    <i class="fas fa-comment"></i> Комментарий к заказу
+                </h2>
+                <div class="comment-box" id="orderComment">
+                    Нет комментариев
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Status Modal -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Изменить статус заказа</h2>
+                <button class="close-modal" onclick="closeStatusModal()">&times;</button>
+            </div>
+            <form onsubmit="updateOrderStatus(event)">
+                <div class="form-group">
+                    <label>Новый статус</label>
+                    <select id="newStatus" required>
+                        <option value="">Выберите статус</option>
+                        <option value="новый">Новый</option>
+                        <option value="в работе">В работе</option>
+                        <option value="готов">Готов</option>
+                        <option value="доставлен">Доставлен</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeStatusModal()">Отмена</button>
+                    <button type="submit" class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8011';
+        let currentOrder = null;
+
+        // Get order ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('id');
+
+        if (!orderId) {
+            alert('Order ID not provided');
+            window.location.href = 'orders.html';
+        }
+
+        // Check authentication
+        window.addEventListener('DOMContentLoaded', function() {
+            checkAuthentication();
+        });
+
+        function checkAuthentication() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Verify token
+            fetch(`${API_BASE}/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Invalid token');
+                }
+                return response.json();
+            })
+            .then(user => {
+                document.getElementById('userName').textContent = user.username;
+                loadOrderDetails();
+            })
+            .catch(error => {
+                console.error('Auth error:', error);
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            });
+        }
+
+        async function loadOrderDetails() {
+            const token = localStorage.getItem('authToken');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/${orderId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load order');
+                }
+
+                const order = await response.json();
+                currentOrder = order;
+                displayOrderDetails(order);
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('orderContent').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading order:', error);
+                alert('Ошибка загрузки заказа');
+                window.location.href = 'orders.html';
+            }
+        }
+
+        function displayOrderDetails(order) {
+            // Header
+            document.getElementById('orderId').textContent = order.id;
+            document.getElementById('breadcrumbOrderId').textContent = `Заказ #${order.id}`;
+            document.getElementById('orderStatus').textContent = order.status;
+            document.getElementById('orderStatus').className = `status-badge-large ${getStatusClass(order.status)}`;
+
+            // Client information
+            if (order.client) {
+                document.getElementById('clientName').textContent = order.client.name;
+                document.getElementById('clientPhone').textContent = order.client.phone || '-';
+                document.getElementById('clientEmail').textContent = order.client.email || '-';
+                document.getElementById('clientAddress').textContent = order.client.address || '-';
+            }
+
+            // Recipient information
+            if (order.recipient) {
+                document.getElementById('recipientName').textContent = order.recipient.name;
+                document.getElementById('recipientPhone').textContent = order.recipient.phone || '-';
+                document.getElementById('recipientEmail').textContent = order.recipient.email || '-';
+            }
+            document.getElementById('deliveryAddress').textContent = order.delivery_address || '-';
+
+            // Delivery information
+            document.getElementById('deliveryDate').textContent = formatDate(order.delivery_date);
+            document.getElementById('executor').textContent = order.executor ? order.executor.username : 'Не назначен';
+            document.getElementById('createdAt').textContent = formatDate(order.created_at);
+            document.getElementById('currentStatus').textContent = order.status;
+
+            // Timeline
+            const timeline = document.getElementById('orderTimeline');
+            timeline.innerHTML = `
+                <div class="timeline-item">
+                    <div class="timeline-date">${formatDate(order.created_at)}</div>
+                    <div class="timeline-content">Заказ создан</div>
+                </div>
+                ${order.status === 'в работе' ? `
+                    <div class="timeline-item">
+                        <div class="timeline-date">-</div>
+                        <div class="timeline-content">Заказ принят в работу</div>
+                    </div>
+                ` : ''}
+                ${order.status === 'готов' ? `
+                    <div class="timeline-item">
+                        <div class="timeline-date">-</div>
+                        <div class="timeline-content">Заказ готов</div>
+                    </div>
+                ` : ''}
+                ${order.status === 'доставлен' ? `
+                    <div class="timeline-item">
+                        <div class="timeline-date">-</div>
+                        <div class="timeline-content">Заказ доставлен</div>
+                    </div>
+                ` : ''}
+            `;
+
+            // Products
+            const productsBody = document.getElementById('productsTableBody');
+            if (order.order_items && order.order_items.length > 0) {
+                productsBody.innerHTML = order.order_items.map(item => `
+                    <tr>
+                        <td>${item.product ? item.product.name : 'Unknown product'}</td>
+                        <td>${item.quantity}</td>
+                        <td>${formatCurrency(item.price)}</td>
+                        <td>${formatCurrency(item.price * item.quantity)}</td>
+                    </tr>
+                `).join('');
+            } else {
+                productsBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Нет товаров</td></tr>';
+            }
+
+            // Total price
+            document.getElementById('totalPrice').textContent = formatCurrency(order.total_price || 0);
+
+            // Comment
+            if (order.comment) {
+                document.getElementById('orderComment').textContent = order.comment;
+            }
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'новый': 'status-new',
+                'в работе': 'status-progress',
+                'готов': 'status-ready',
+                'доставлен': 'status-delivered'
+            };
+            return statusMap[status] || 'status-new';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ru-KZ', {
+                style: 'currency',
+                currency: 'KZT',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function showStatusModal() {
+            document.getElementById('newStatus').value = currentOrder.status;
+            document.getElementById('statusModal').style.display = 'flex';
+        }
+
+        function closeStatusModal() {
+            document.getElementById('statusModal').style.display = 'none';
+        }
+
+        async function updateOrderStatus(event) {
+            event.preventDefault();
+
+            const newStatus = document.getElementById('newStatus').value;
+            const token = localStorage.getItem('authToken');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to update status');
+                }
+
+                closeStatusModal();
+                loadOrderDetails(); // Reload order data
+                alert('Статус заказа успешно обновлен!');
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Ошибка при обновлении статуса');
+            }
+        }
+
+        async function deleteOrder() {
+            if (!confirm('Вы уверены, что хотите удалить этот заказ?')) {
+                return;
+            }
+
+            const token = localStorage.getItem('authToken');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/orders/${orderId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to delete order');
+                }
+
+                alert('Заказ успешно удален!');
+                window.location.href = 'orders.html';
+            } catch (error) {
+                console.error('Error deleting order:', error);
+                alert('Ошибка при удалении заказа');
+            }
+        }
+
+        function printOrder() {
+            window.print();
+        }
+
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Click outside modal to close
+        window.onclick = function(event) {
+            const modal = document.getElementById('statusModal');
+            if (event.target == modal) {
+                closeStatusModal();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRM Dashboard - Florist Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+
+        .user-name {
+            font-weight: 500;
+        }
+
+        .user-role {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .navigation {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-item {
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .summary-card {
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .summary-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .summary-card .number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-card .label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .orders-today .icon { color: #4CAF50; }
+        .orders-progress .icon { color: #FF9800; }
+        .low-stock .icon { color: #f44336; }
+        .new-clients .icon { color: #2196F3; }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .recent-orders {
+            grid-column: 1 / -1;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .status.pending { background: #fff3cd; color: #856404; }
+        .status.in-progress { background: #cce5ff; color: #004085; }
+        .status.completed { background: #d4edda; color: #155724; }
+        .status.cancelled { background: #f8d7da; color: #721c24; }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: white;
+            font-size: 1.2rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-menu {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .quick-actions {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .summary-cards,
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                Florist CRM
+            </div>
+            <div class="user-info">
+                <span class="user-name" id="userName">Loading...</span>
+                <span class="user-role" id="userRole">Loading...</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <nav class="navigation">
+        <div class="nav-content">
+            <div class="nav-menu">
+                <a href="#" class="nav-item active" onclick="showSection('dashboard')">
+                    <i class="fas fa-tachometer-alt"></i> Dashboard
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('orders')">
+                    <i class="fas fa-shopping-cart"></i> Orders
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('products')">
+                    <i class="fas fa-flower"></i> Products
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('inventory')">
+                    <i class="fas fa-warehouse"></i> Inventory
+                </a>
+                <a href="#" class="nav-item" onclick="showSection('clients')">
+                    <i class="fas fa-users"></i> Clients
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+            Loading dashboard data...
+        </div>
+
+        <div id="errorState" class="error" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span id="errorMessage">An error occurred while loading the dashboard.</span>
+        </div>
+
+        <div id="dashboardContent" style="display: none;">
+            <!-- Summary Cards -->
+            <div class="summary-cards">
+                <div class="card summary-card orders-today">
+                    <i class="fas fa-calendar-day icon"></i>
+                    <div class="number" id="ordersToday">0</div>
+                    <div class="label">Orders Today</div>
+                </div>
+                <div class="card summary-card orders-progress">
+                    <i class="fas fa-clock icon"></i>
+                    <div class="number" id="ordersProgress">0</div>
+                    <div class="label">In Progress</div>
+                </div>
+                <div class="card summary-card low-stock">
+                    <i class="fas fa-exclamation-triangle icon"></i>
+                    <div class="number" id="lowStock">0</div>
+                    <div class="label">Low Stock Alerts</div>
+                </div>
+                <div class="card summary-card new-clients">
+                    <i class="fas fa-user-plus icon"></i>
+                    <div class="number" id="newClients">0</div>
+                    <div class="label">New Clients This Week</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <h3 style="margin-bottom: 1rem; color: #333;">Quick Actions</h3>
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="createNewOrder()">
+                        <i class="fas fa-plus"></i> New Order
+                    </button>
+                    <button class="action-btn" onclick="addProduct()">
+                        <i class="fas fa-flower"></i> Add Product
+                    </button>
+                    <button class="action-btn" onclick="updateInventory()">
+                        <i class="fas fa-boxes"></i> Update Inventory
+                    </button>
+                    <button class="action-btn" onclick="addClient()">
+                        <i class="fas fa-user-plus"></i> Add Client
+                    </button>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="card recent-orders">
+                <h3 style="margin-bottom: 1rem; color: #333;">Recent Orders</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Client</th>
+                                <th>Status</th>
+                                <th>Total</th>
+                                <th>Delivery Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
+                                    Loading recent orders...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8011';
+
+        // Check authentication on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            checkAuthentication();
+        });
+
+        function checkAuthentication() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Verify token is still valid
+            fetch(`${API_BASE}/me`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Invalid token');
+                }
+                return response.json();
+            })
+            .then(user => {
+                updateUserInfo(user);
+                loadDashboardData();
+            })
+            .catch(error => {
+                console.error('Authentication error:', error);
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            });
+        }
+
+        function updateUserInfo(user) {
+            document.getElementById('userName').textContent = user.name || user.username;
+            document.getElementById('userRole').textContent = user.role || 'User';
+        }
+
+        function loadDashboardData() {
+            const token = localStorage.getItem('authToken');
+
+            Promise.all([
+                fetch(`${API_BASE}/api/stats/dashboard`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                fetch(`${API_BASE}/api/orders?limit=5`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+            ])
+            .then(responses => {
+                return Promise.all(responses.map(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                }));
+            })
+            .then(([summaryData, recentOrders]) => {
+                updateSummaryCards(summaryData);
+                updateRecentOrders(recentOrders);
+                showDashboard();
+            })
+            .catch(error => {
+                console.error('Error loading dashboard data:', error);
+                showError('Failed to load dashboard data. Please try again.');
+            });
+        }
+
+        function updateSummaryCards(data) {
+            document.getElementById('ordersToday').textContent = data.ordersToday || 0;
+            document.getElementById('ordersProgress').textContent = data.ordersInProgress || 0;
+            document.getElementById('lowStock').textContent = data.lowStockItems || 0;
+            document.getElementById('newClients').textContent = data.newClientsThisWeek || 0;
+        }
+
+        function updateRecentOrders(orders) {
+            const tableBody = document.getElementById('recentOrdersTable');
+
+            if (!orders || orders.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem; color: #666;">
+                            No recent orders found
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = orders.map(order => `
+                <tr>
+                    <td>#${order.id}</td>
+                    <td>${order.client ? order.client.name : 'N/A'}</td>
+                    <td><span class="status ${getStatusClass(order.status)}">${order.status}</span></td>
+                    <td>${formatCurrency(order.total_price || 0)}</td>
+                    <td>${order.delivery_date ? formatDate(order.delivery_date) : 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        function showDashboard() {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'block';
+        }
+
+        function showError(message) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('dashboardContent').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorState').style.display = 'block';
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('kk-KZ', {
+                style: 'currency',
+                currency: 'KZT'
+            }).format(amount);
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'новый': 'pending',
+                'в работе': 'in-progress',
+                'готов': 'completed',
+                'доставлен': 'completed',
+                'отменен': 'cancelled'
+            };
+            return statusMap[status.toLowerCase()] || 'pending';
+        }
+
+        // Navigation functions
+        function showSection(section) {
+            // Remove active class from all nav items
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Add active class to clicked item
+            event.target.classList.add('active');
+
+            // For now, we'll just show an alert
+            // In a real implementation, these would navigate to different pages or load different content
+            switch(section) {
+                case 'dashboard':
+                    // Already on dashboard
+                    break;
+                case 'orders':
+                    window.location.href = 'orders.html';
+                    break;
+                case 'products':
+                    alert('Products section - would navigate to product catalog page');
+                    break;
+                case 'inventory':
+                    alert('Inventory section - would navigate to inventory management page');
+                    break;
+                case 'clients':
+                    alert('Clients section - would navigate to client management page');
+                    break;
+            }
+        }
+
+        // Quick action functions
+        function createNewOrder() {
+            alert('Create New Order - would open order creation form');
+        }
+
+        function addProduct() {
+            alert('Add Product - would open product addition form');
+        }
+
+        function updateInventory() {
+            alert('Update Inventory - would open inventory update form');
+        }
+
+        function addClient() {
+            alert('Add Client - would open client registration form');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Refresh dashboard data every 5 minutes
+        setInterval(() => {
+            if (document.getElementById('dashboardContent').style.display !== 'none') {
+                loadDashboardData();
+            }
+        }, 300000); // 5 minutes
+    </script>
+</body>
+</html>

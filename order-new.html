@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новый заказ - Florist CRM</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: white;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+        }
+
+        .breadcrumb a:hover {
+            opacity: 1;
+        }
+
+        .page-title {
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            color: white;
+            opacity: 0.5;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .step.active {
+            opacity: 1;
+        }
+
+        .step.completed {
+            opacity: 0.8;
+        }
+
+        .step-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.5rem;
+            font-weight: bold;
+        }
+
+        .step.active .step-number {
+            background: white;
+            color: #667eea;
+        }
+
+        .step.completed .step-number {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .step-title {
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            margin-bottom: 2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+        }
+
+        .products-section {
+            margin-top: 2rem;
+        }
+
+        .product-selector {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .selected-products {
+            margin-top: 1.5rem;
+        }
+
+        .product-item {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-name {
+            font-weight: 500;
+        }
+
+        .quantity-input {
+            width: 80px;
+            text-align: center;
+        }
+
+        .price-display {
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .total-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-row.grand-total {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #667eea;
+            padding-top: 1rem;
+            border-top: 2px solid #ddd;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .required {
+            color: #f44336;
+        }
+
+        .error-message {
+            color: #f44336;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .step-content {
+            display: none;
+        }
+
+        .step-content.active {
+            display: block;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-radius: 50%;
+            border-top-color: #667eea;
+            animation: spin 1s ease-in-out infinite;
+            margin-left: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .stepper {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .product-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                Florist CRM
+            </div>
+            <div class="user-info">
+                <span id="userName">Loading...</span>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Выход
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="dashboard.html">Dashboard</a>
+            <span>/</span>
+            <a href="orders.html">Заказы</a>
+            <span>/</span>
+            <span>Новый заказ</span>
+        </div>
+
+        <h1 class="page-title">
+            <i class="fas fa-plus-circle"></i> Создать новый заказ
+        </h1>
+
+        <!-- Stepper -->
+        <div class="stepper">
+            <div class="step active" onclick="goToStep(1)">
+                <div class="step-number">1</div>
+                <div class="step-title">Клиент</div>
+            </div>
+            <div class="step" onclick="goToStep(2)">
+                <div class="step-number">2</div>
+                <div class="step-title">Получатель</div>
+            </div>
+            <div class="step" onclick="goToStep(3)">
+                <div class="step-number">3</div>
+                <div class="step-title">Товары</div>
+            </div>
+            <div class="step" onclick="goToStep(4)">
+                <div class="step-number">4</div>
+                <div class="step-title">Доставка</div>
+            </div>
+            <div class="step" onclick="goToStep(5)">
+                <div class="step-number">5</div>
+                <div class="step-title">Подтверждение</div>
+            </div>
+        </div>
+
+        <form id="orderForm" onsubmit="submitOrder(event)">
+            <!-- Step 1: Client -->
+            <div class="step-content active" id="step1">
+                <div class="card">
+                    <h2 style="margin-bottom: 1.5rem;">Информация о заказчике</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Выберите клиента <span class="required">*</span></label>
+                            <select id="clientId" required onchange="onClientChange()">
+                                <option value="">Загрузка...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="createNewClient" onchange="toggleNewClientForm()">
+                        <label for="createNewClient">Создать нового клиента</label>
+                    </div>
+                    <div id="newClientForm" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Имя <span class="required">*</span></label>
+                                <input type="text" id="newClientName" placeholder="Введите имя">
+                            </div>
+                            <div class="form-group">
+                                <label>Телефон <span class="required">*</span></label>
+                                <input type="tel" id="newClientPhone" placeholder="+7XXXXXXXXXX" pattern="\+7\d{10}">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="newClientEmail" placeholder="email@example.com">
+                            </div>
+                            <div class="form-group">
+                                <label>Адрес</label>
+                                <input type="text" id="newClientAddress" placeholder="Адрес клиента">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='orders.html'">
+                            Отмена
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">
+                            Далее <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Recipient -->
+            <div class="step-content" id="step2">
+                <div class="card">
+                    <h2 style="margin-bottom: 1.5rem;">Информация о получателе</h2>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="sameAsClient" onchange="toggleRecipientForm()">
+                        <label for="sameAsClient">Получатель совпадает с заказчиком</label>
+                    </div>
+                    <div id="recipientForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Выберите получателя <span class="required">*</span></label>
+                                <select id="recipientId">
+                                    <option value="">Загрузка...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="createNewRecipient" onchange="toggleNewRecipientForm()">
+                            <label for="createNewRecipient">Создать нового получателя</label>
+                        </div>
+                        <div id="newRecipientForm" style="display: none;">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Имя <span class="required">*</span></label>
+                                    <input type="text" id="newRecipientName" placeholder="Введите имя">
+                                </div>
+                                <div class="form-group">
+                                    <label>Телефон <span class="required">*</span></label>
+                                    <input type="tel" id="newRecipientPhone" placeholder="+7XXXXXXXXXX" pattern="\+7\d{10}">
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Email</label>
+                                    <input type="email" id="newRecipientEmail" placeholder="email@example.com">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="previousStep()">
+                            <i class="fas fa-arrow-left"></i> Назад
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">
+                            Далее <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Products -->
+            <div class="step-content" id="step3">
+                <div class="card">
+                    <h2 style="margin-bottom: 1.5rem;">Выбор товаров</h2>
+                    <div class="product-selector">
+                        <select id="productSelect">
+                            <option value="">Выберите товар...</option>
+                        </select>
+                        <input type="number" id="productQuantity" min="1" value="1" placeholder="Кол-во" style="width: 100px;">
+                        <button type="button" class="btn btn-success" onclick="addProduct()">
+                            <i class="fas fa-plus"></i> Добавить
+                        </button>
+                    </div>
+                    <div class="selected-products">
+                        <h3>Выбранные товары:</h3>
+                        <div id="selectedProductsList">
+                            <p style="color: #999;">Товары не добавлены</p>
+                        </div>
+                    </div>
+                    <div class="total-section">
+                        <div class="total-row">
+                            <span>Подитог:</span>
+                            <span id="subtotal">0 KZT</span>
+                        </div>
+                        <div class="total-row grand-total">
+                            <span>Итого:</span>
+                            <span id="grandTotal">0 KZT</span>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="previousStep()">
+                            <i class="fas fa-arrow-left"></i> Назад
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">
+                            Далее <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4: Delivery -->
+            <div class="step-content" id="step4">
+                <div class="card">
+                    <h2 style="margin-bottom: 1.5rem;">Информация о доставке</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Дата доставки <span class="required">*</span></label>
+                            <input type="datetime-local" id="deliveryDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Исполнитель</label>
+                            <select id="executorId">
+                                <option value="">Не назначен</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Адрес доставки <span class="required">*</span></label>
+                        <input type="text" id="deliveryAddress" required placeholder="Полный адрес доставки">
+                    </div>
+                    <div class="form-group">
+                        <label>Комментарий к заказу</label>
+                        <textarea id="orderComment" placeholder="Дополнительная информация о заказе..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="previousStep()">
+                            <i class="fas fa-arrow-left"></i> Назад
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="nextStep()">
+                            Далее <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 5: Confirmation -->
+            <div class="step-content" id="step5">
+                <div class="card">
+                    <h2 style="margin-bottom: 1.5rem;">Подтверждение заказа</h2>
+                    <div id="orderSummary">
+                        <!-- Summary will be generated here -->
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="previousStep()">
+                            <i class="fas fa-arrow-left"></i> Назад
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Создать заказ
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8011';
+        let currentStep = 1;
+        let clients = [];
+        let products = [];
+        let selectedProducts = [];
+        let orderData = {
+            client_id: null,
+            recipient_id: null,
+            items: [],
+            delivery_date: null,
+            delivery_address: null,
+            comment: null,
+            executor_id: null
+        };
+
+        // Check authentication
+        window.addEventListener('DOMContentLoaded', function() {
+            checkAuthentication();
+        });
+
+        function checkAuthentication() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // Verify token
+            fetch(`${API_BASE}/me`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Invalid token');
+                }
+                return response.json();
+            })
+            .then(user => {
+                document.getElementById('userName').textContent = user.username;
+                loadInitialData();
+            })
+            .catch(error => {
+                console.error('Auth error:', error);
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            });
+        }
+
+        async function loadInitialData() {
+            const token = localStorage.getItem('authToken');
+
+            try {
+                // Load clients
+                const clientsResponse = await fetch(`${API_BASE}/api/clients`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                clients = await clientsResponse.json();
+
+                // Load products
+                const productsResponse = await fetch(`${API_BASE}/api/products`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                products = await productsResponse.json();
+
+                // Load users for executor
+                const usersResponse = await fetch(`${API_BASE}/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const users = await usersResponse.json();
+
+                // Populate dropdowns
+                populateClientDropdown();
+                populateRecipientDropdown();
+                populateProductDropdown();
+                populateExecutorDropdown(users);
+
+                // Set minimum date for delivery
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                document.getElementById('deliveryDate').min = tomorrow.toISOString().slice(0, 16);
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Ошибка загрузки данных');
+            }
+        }
+
+        function populateClientDropdown() {
+            const select = document.getElementById('clientId');
+            select.innerHTML = '<option value="">Выберите клиента...</option>';
+
+            const clientClients = clients.filter(c => c.client_type === 'заказчик' || c.client_type === 'оба');
+            clientClients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = `${client.name} (${client.phone})`;
+                select.appendChild(option);
+            });
+        }
+
+        function populateRecipientDropdown() {
+            const select = document.getElementById('recipientId');
+            select.innerHTML = '<option value="">Выберите получателя...</option>';
+
+            const recipientClients = clients.filter(c => c.client_type === 'получатель' || c.client_type === 'оба');
+            recipientClients.forEach(client => {
+                const option = document.createElement('option');
+                option.value = client.id;
+                option.textContent = `${client.name} (${client.phone})`;
+                select.appendChild(option);
+            });
+        }
+
+        function populateProductDropdown() {
+            const select = document.getElementById('productSelect');
+            select.innerHTML = '<option value="">Выберите товар...</option>';
+
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = `${product.name} - ${formatCurrency(product.price)}`;
+                option.dataset.price = product.price;
+                option.dataset.name = product.name;
+                select.appendChild(option);
+            });
+        }
+
+        function populateExecutorDropdown(users) {
+            const select = document.getElementById('executorId');
+            select.innerHTML = '<option value="">Не назначен</option>';
+
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.username;
+                select.appendChild(option);
+            });
+        }
+
+        function toggleNewClientForm() {
+            const checkbox = document.getElementById('createNewClient');
+            const form = document.getElementById('newClientForm');
+            const select = document.getElementById('clientId');
+
+            if (checkbox.checked) {
+                form.style.display = 'block';
+                select.disabled = true;
+                select.required = false;
+            } else {
+                form.style.display = 'none';
+                select.disabled = false;
+                select.required = true;
+            }
+        }
+
+        function toggleRecipientForm() {
+            const checkbox = document.getElementById('sameAsClient');
+            const form = document.getElementById('recipientForm');
+
+            if (checkbox.checked) {
+                form.style.display = 'none';
+            } else {
+                form.style.display = 'block';
+            }
+        }
+
+        function toggleNewRecipientForm() {
+            const checkbox = document.getElementById('createNewRecipient');
+            const form = document.getElementById('newRecipientForm');
+            const select = document.getElementById('recipientId');
+
+            if (checkbox.checked) {
+                form.style.display = 'block';
+                select.disabled = true;
+                select.required = false;
+            } else {
+                form.style.display = 'none';
+                select.disabled = false;
+                select.required = true;
+            }
+        }
+
+        function onClientChange() {
+            const clientId = document.getElementById('clientId').value;
+            if (clientId) {
+                const client = clients.find(c => c.id == clientId);
+                if (client && client.address) {
+                    document.getElementById('deliveryAddress').value = client.address;
+                }
+            }
+        }
+
+        function addProduct() {
+            const select = document.getElementById('productSelect');
+            const quantityInput = document.getElementById('productQuantity');
+
+            if (!select.value) {
+                alert('Выберите товар');
+                return;
+            }
+
+            const productId = parseInt(select.value);
+            const quantity = parseInt(quantityInput.value) || 1;
+            const option = select.options[select.selectedIndex];
+            const price = parseFloat(option.dataset.price);
+            const name = option.dataset.name;
+
+            // Check if product already added
+            const existingIndex = selectedProducts.findIndex(p => p.product_id === productId);
+            if (existingIndex >= 0) {
+                selectedProducts[existingIndex].quantity += quantity;
+            } else {
+                selectedProducts.push({
+                    product_id: productId,
+                    name: name,
+                    price: price,
+                    quantity: quantity
+                });
+            }
+
+            updateProductsList();
+            select.value = '';
+            quantityInput.value = 1;
+        }
+
+        function removeProduct(index) {
+            selectedProducts.splice(index, 1);
+            updateProductsList();
+        }
+
+        function updateProductQuantity(index, quantity) {
+            selectedProducts[index].quantity = parseInt(quantity) || 1;
+            updateProductsList();
+        }
+
+        function updateProductsList() {
+            const container = document.getElementById('selectedProductsList');
+
+            if (selectedProducts.length === 0) {
+                container.innerHTML = '<p style="color: #999;">Товары не добавлены</p>';
+                document.getElementById('subtotal').textContent = '0 KZT';
+                document.getElementById('grandTotal').textContent = '0 KZT';
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = selectedProducts.map((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                return `
+                    <div class="product-item">
+                        <div class="product-name">${item.name}</div>
+                        <input type="number" min="1" value="${item.quantity}"
+                               onchange="updateProductQuantity(${index}, this.value)"
+                               class="quantity-input">
+                        <div class="price-display">${formatCurrency(item.price)}</div>
+                        <div class="price-display">${formatCurrency(itemTotal)}</div>
+                        <button type="button" class="btn btn-danger btn-icon" onclick="removeProduct(${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('subtotal').textContent = formatCurrency(total);
+            document.getElementById('grandTotal').textContent = formatCurrency(total);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ru-KZ', {
+                style: 'currency',
+                currency: 'KZT',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function goToStep(step) {
+            if (step < currentStep || validateCurrentStep()) {
+                currentStep = step;
+                updateStepperDisplay();
+                updateStepContentDisplay();
+            }
+        }
+
+        function nextStep() {
+            if (validateCurrentStep()) {
+                if (currentStep === 4) {
+                    generateOrderSummary();
+                }
+                currentStep++;
+                updateStepperDisplay();
+                updateStepContentDisplay();
+            }
+        }
+
+        function previousStep() {
+            currentStep--;
+            updateStepperDisplay();
+            updateStepContentDisplay();
+        }
+
+        function updateStepperDisplay() {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach((step, index) => {
+                step.classList.remove('active', 'completed');
+                if (index + 1 === currentStep) {
+                    step.classList.add('active');
+                } else if (index + 1 < currentStep) {
+                    step.classList.add('completed');
+                }
+            });
+        }
+
+        function updateStepContentDisplay() {
+            const contents = document.querySelectorAll('.step-content');
+            contents.forEach((content, index) => {
+                content.classList.remove('active');
+                if (index + 1 === currentStep) {
+                    content.classList.add('active');
+                }
+            });
+        }
+
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 1:
+                    // Validate client selection
+                    if (document.getElementById('createNewClient').checked) {
+                        const name = document.getElementById('newClientName').value;
+                        const phone = document.getElementById('newClientPhone').value;
+                        if (!name || !phone) {
+                            alert('Заполните имя и телефон клиента');
+                            return false;
+                        }
+                    } else {
+                        if (!document.getElementById('clientId').value) {
+                            alert('Выберите клиента');
+                            return false;
+                        }
+                        orderData.client_id = parseInt(document.getElementById('clientId').value);
+                    }
+                    return true;
+
+                case 2:
+                    // Validate recipient selection
+                    if (document.getElementById('sameAsClient').checked) {
+                        orderData.recipient_id = orderData.client_id;
+                    } else if (document.getElementById('createNewRecipient').checked) {
+                        const name = document.getElementById('newRecipientName').value;
+                        const phone = document.getElementById('newRecipientPhone').value;
+                        if (!name || !phone) {
+                            alert('Заполните имя и телефон получателя');
+                            return false;
+                        }
+                    } else {
+                        if (!document.getElementById('recipientId').value) {
+                            alert('Выберите получателя');
+                            return false;
+                        }
+                        orderData.recipient_id = parseInt(document.getElementById('recipientId').value);
+                    }
+                    return true;
+
+                case 3:
+                    // Validate products
+                    if (selectedProducts.length === 0) {
+                        alert('Добавьте хотя бы один товар');
+                        return false;
+                    }
+                    orderData.items = selectedProducts.map(p => ({
+                        product_id: p.product_id,
+                        quantity: p.quantity,
+                        price: p.price
+                    }));
+                    return true;
+
+                case 4:
+                    // Validate delivery info
+                    const deliveryDate = document.getElementById('deliveryDate').value;
+                    const deliveryAddress = document.getElementById('deliveryAddress').value;
+
+                    if (!deliveryDate || !deliveryAddress) {
+                        alert('Заполните дату и адрес доставки');
+                        return false;
+                    }
+
+                    orderData.delivery_date = deliveryDate;
+                    orderData.delivery_address = deliveryAddress;
+                    orderData.comment = document.getElementById('orderComment').value;
+                    orderData.executor_id = document.getElementById('executorId').value || null;
+                    return true;
+
+                default:
+                    return true;
+            }
+        }
+
+        function generateOrderSummary() {
+            const summary = document.getElementById('orderSummary');
+
+            const client = clients.find(c => c.id === orderData.client_id);
+            const recipient = clients.find(c => c.id === orderData.recipient_id);
+            const total = selectedProducts.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+            summary.innerHTML = `
+                <div style="display: grid; gap: 1rem;">
+                    <div>
+                        <strong>Клиент:</strong> ${client ? client.name : 'Новый клиент'}
+                    </div>
+                    <div>
+                        <strong>Получатель:</strong> ${recipient ? recipient.name : 'Новый получатель'}
+                    </div>
+                    <div>
+                        <strong>Дата доставки:</strong> ${new Date(orderData.delivery_date).toLocaleString('ru-RU')}
+                    </div>
+                    <div>
+                        <strong>Адрес доставки:</strong> ${orderData.delivery_address}
+                    </div>
+                    <div>
+                        <strong>Товары:</strong>
+                        <ul style="margin-top: 0.5rem;">
+                            ${selectedProducts.map(item => `
+                                <li>${item.name} x ${item.quantity} = ${formatCurrency(item.price * item.quantity)}</li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                    <div style="font-size: 1.25rem; font-weight: bold; color: #667eea;">
+                        <strong>Итого:</strong> ${formatCurrency(total)}
+                    </div>
+                </div>
+            `;
+        }
+
+        async function submitOrder(event) {
+            event.preventDefault();
+
+            const token = localStorage.getItem('authToken');
+
+            // Handle new client/recipient creation if needed
+            try {
+                // Create new client if needed
+                if (document.getElementById('createNewClient').checked) {
+                    const newClientData = {
+                        name: document.getElementById('newClientName').value,
+                        phone: document.getElementById('newClientPhone').value,
+                        email: document.getElementById('newClientEmail').value || null,
+                        address: document.getElementById('newClientAddress').value || null,
+                        client_type: 'заказчик'
+                    };
+
+                    const clientResponse = await fetch(`${API_BASE}/api/clients`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newClientData)
+                    });
+
+                    if (!clientResponse.ok) throw new Error('Failed to create client');
+                    const newClient = await clientResponse.json();
+                    orderData.client_id = newClient.id;
+                }
+
+                // Create new recipient if needed
+                if (document.getElementById('createNewRecipient').checked && !document.getElementById('sameAsClient').checked) {
+                    const newRecipientData = {
+                        name: document.getElementById('newRecipientName').value,
+                        phone: document.getElementById('newRecipientPhone').value,
+                        email: document.getElementById('newRecipientEmail').value || null,
+                        address: null,
+                        client_type: 'получатель'
+                    };
+
+                    const recipientResponse = await fetch(`${API_BASE}/api/clients`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(newRecipientData)
+                    });
+
+                    if (!recipientResponse.ok) throw new Error('Failed to create recipient');
+                    const newRecipient = await recipientResponse.json();
+                    orderData.recipient_id = newRecipient.id;
+                }
+
+                // Create the order
+                const orderPayload = {
+                    client_id: orderData.client_id,
+                    recipient_id: orderData.recipient_id,
+                    delivery_date: orderData.delivery_date,
+                    delivery_address: orderData.delivery_address,
+                    comment: orderData.comment,
+                    executor_id: orderData.executor_id,
+                    items: orderData.items
+                };
+
+                const orderResponse = await fetch(`${API_BASE}/api/orders`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(orderPayload)
+                });
+
+                if (!orderResponse.ok) {
+                    const error = await orderResponse.json();
+                    throw new Error(error.detail || 'Failed to create order');
+                }
+
+                const newOrder = await orderResponse.json();
+                alert(`Заказ #${newOrder.id} успешно создан!`);
+                window.location.href = `order-detail.html?id=${newOrder.id}`;
+
+            } catch (error) {
+                console.error('Error creating order:', error);
+                alert(`Ошибка при создании заказа: ${error.message}`);
+            }
+        }
+
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти?')) {
+                localStorage.removeItem('authToken');
+                window.location.href = 'index.html';
+            }
+        }
+    </script>
+</body>
+</html>
