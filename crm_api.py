@@ -190,28 +190,35 @@ class OrderCreate(BaseModel):
 class OrderUpdate(BaseModel):
     recipient_id: Optional[int] = None
     executor_id: Optional[int] = None
-    status: Optional[str] = Field(None, pattern=r'^(новый|в работе|готов|доставлен)$')
+    courier_id: Optional[int] = None
+    status: Optional[str] = Field(None, pattern=r'^(новый|оплаченный|принятый|собранный|в_пути|доставленный|отмененный|в работе|готов|доставлен)$')
     delivery_date: Optional[datetime] = None
     delivery_address: Optional[str] = Field(None, min_length=5, max_length=500)
+    delivery_time_range: Optional[str] = Field(None, max_length=50)  # e.g., "10:00-12:00"
     comment: Optional[str] = Field(None, max_length=1000)
+    notes: Optional[str] = Field(None, max_length=1000)  # Internal notes field
 
 class OrderStatusUpdate(BaseModel):
-    status: str = Field(..., pattern=r'^(новый|в работе|готов|доставлен)$')
+    status: str = Field(..., pattern=r'^(новый|оплаченный|принятый|собранный|в_пути|доставленный|отмененный|в работе|готов|доставлен)$')
 
 class OrderResponse(BaseModel):
     id: int
     client_id: int
     recipient_id: int
     executor_id: Optional[int]
+    courier_id: Optional[int]
     status: str
     delivery_date: datetime
     delivery_address: str
+    delivery_time_range: Optional[str]  # Added field for delivery time range
     total_price: Optional[float]
     comment: Optional[str]
+    notes: Optional[str]
     created_at: datetime
     client: ClientResponse
     recipient: ClientResponse
     executor: Optional[dict]  # User data if executor is assigned
+    courier: Optional[dict]  # User data if courier is assigned
     order_items: List[OrderItemResponse]
 
     class Config:
@@ -899,6 +906,16 @@ async def get_orders(
                 "position": order.executor.position if hasattr(order.executor, 'position') else None,
             }
 
+        courier_dict = None
+        if order.courier:
+            courier_dict = {
+                "id": order.courier.id,
+                "username": order.courier.username,
+                "email": order.courier.email,
+                "city": order.courier.city if hasattr(order.courier, 'city') else None,
+                "position": order.courier.position if hasattr(order.courier, 'position') else None,
+            }
+
         # Convert order items
         order_items_list = []
         if order.order_items:
@@ -921,15 +938,19 @@ async def get_orders(
             "client_id": order.client_id,
             "recipient_id": order.recipient_id,
             "executor_id": order.executor_id,
+            "courier_id": order.courier_id,
             "status": order.status,
             "delivery_date": order.delivery_date,
             "delivery_address": order.delivery_address,
+            "delivery_time_range": order.delivery_time_range,
             "total_price": order.total_price,
             "comment": order.comment,
+            "notes": order.notes,
             "created_at": order.created_at,
             "client": client_dict,
             "recipient": recipient_dict,
             "executor": executor_dict,
+            "courier": courier_dict,
             "order_items": order_items_list
         }
         orders_response.append(order_dict)
@@ -991,11 +1012,15 @@ def search_orders(
             "client_id": order.client_id,
             "recipient_id": order.recipient_id,
             "executor_id": order.executor_id,
+        "courier_id": order.courier_id,
+            "courier_id": order.courier_id,
             "status": order.status,
             "delivery_date": order.delivery_date,
             "delivery_address": order.delivery_address,
+            "delivery_time_range": order.delivery_time_range,
             "total_price": order.total_price,
             "comment": order.comment,
+            "notes": order.notes,
             "created_at": order.created_at,
             "client": {
                 "id": order.client.id,
@@ -1013,6 +1038,13 @@ def search_orders(
                 "username": order.executor.username,
                 "position": order.executor.position if hasattr(order.executor, 'position') else None,
             } if order.executor else None,
+        "courier": {
+            "id": order.courier.id,
+            "username": order.courier.username,
+            "email": order.courier.email,
+            "city": order.courier.city if hasattr(order.courier, 'city') else None,
+            "position": order.courier.position if hasattr(order.courier, 'position') else None,
+        } if order.courier else None,
         })
 
     return {
@@ -1038,11 +1070,14 @@ async def get_order(
         "client_id": order.client_id,
         "recipient_id": order.recipient_id,
         "executor_id": order.executor_id,
+        "courier_id": order.courier_id,
         "status": order.status,
         "delivery_date": order.delivery_date,
         "delivery_address": order.delivery_address,
+        "delivery_time_range": order.delivery_time_range,
         "total_price": order.total_price,
         "comment": order.comment,
+        "notes": order.notes,
         "created_at": order.created_at,
         "client": {
             "id": order.client.id,
@@ -1071,6 +1106,13 @@ async def get_order(
             "city": order.executor.city if hasattr(order.executor, 'city') else None,
             "position": order.executor.position if hasattr(order.executor, 'position') else None,
         } if order.executor else None,
+        "courier": {
+            "id": order.courier.id,
+            "username": order.courier.username,
+            "email": order.courier.email,
+            "city": order.courier.city if hasattr(order.courier, 'city') else None,
+            "position": order.courier.position if hasattr(order.courier, 'position') else None,
+        } if order.courier else None,
         "order_items": [
             {
                 "id": item.id,
@@ -1149,11 +1191,14 @@ async def create_order(
         "client_id": db_order.client_id,
         "recipient_id": db_order.recipient_id,
         "executor_id": db_order.executor_id,
+        "courier_id": db_order.courier_id,
         "status": db_order.status,
         "delivery_date": db_order.delivery_date,
         "delivery_address": db_order.delivery_address,
+        "delivery_time_range": db_order.delivery_time_range,
         "total_price": db_order.total_price,
         "comment": db_order.comment,
+        "notes": db_order.notes,
         "created_at": db_order.created_at,
         "client": {
             "id": db_order.client.id,
@@ -1182,6 +1227,13 @@ async def create_order(
             "city": db_order.executor.city if hasattr(db_order.executor, 'city') else None,
             "position": db_order.executor.position if hasattr(db_order.executor, 'position') else None,
         } if db_order.executor else None,
+        "courier": {
+            "id": db_order.courier.id,
+            "username": db_order.courier.username,
+            "email": db_order.courier.email,
+            "city": db_order.courier.city if hasattr(db_order.courier, 'city') else None,
+            "position": db_order.courier.position if hasattr(db_order.courier, 'position') else None,
+        } if db_order.courier else None,
         "order_items": [
             {
                 "id": item.id,
@@ -1238,11 +1290,14 @@ async def update_order(
         "client_id": db_order.client_id,
         "recipient_id": db_order.recipient_id,
         "executor_id": db_order.executor_id,
+        "courier_id": db_order.courier_id,
         "status": db_order.status,
         "delivery_date": db_order.delivery_date,
         "delivery_address": db_order.delivery_address,
+        "delivery_time_range": db_order.delivery_time_range,
         "total_price": db_order.total_price,
         "comment": db_order.comment,
+        "notes": db_order.notes,
         "created_at": db_order.created_at,
         "client": {
             "id": db_order.client.id,
@@ -1271,6 +1326,13 @@ async def update_order(
             "city": db_order.executor.city if hasattr(db_order.executor, 'city') else None,
             "position": db_order.executor.position if hasattr(db_order.executor, 'position') else None,
         } if db_order.executor else None,
+        "courier": {
+            "id": db_order.courier.id,
+            "username": db_order.courier.username,
+            "email": db_order.courier.email,
+            "city": db_order.courier.city if hasattr(db_order.courier, 'city') else None,
+            "position": db_order.courier.position if hasattr(db_order.courier, 'position') else None,
+        } if db_order.courier else None,
         "order_items": [
             {
                 "id": item.id,
@@ -1330,11 +1392,14 @@ async def partial_update_order(
         "client_id": db_order.client_id,
         "recipient_id": db_order.recipient_id,
         "executor_id": db_order.executor_id,
+        "courier_id": db_order.courier_id,
         "status": db_order.status,
         "delivery_date": db_order.delivery_date,
         "delivery_address": db_order.delivery_address,
+        "delivery_time_range": db_order.delivery_time_range,
         "total_price": db_order.total_price,
         "comment": db_order.comment,
+        "notes": db_order.notes,
         "created_at": db_order.created_at,
         "client": {
             "id": db_order.client.id,
@@ -1363,6 +1428,13 @@ async def partial_update_order(
             "city": db_order.executor.city if hasattr(db_order.executor, 'city') else None,
             "position": db_order.executor.position if hasattr(db_order.executor, 'position') else None,
         } if db_order.executor else None,
+        "courier": {
+            "id": db_order.courier.id,
+            "username": db_order.courier.username,
+            "email": db_order.courier.email,
+            "city": db_order.courier.city if hasattr(db_order.courier, 'city') else None,
+            "position": db_order.courier.position if hasattr(db_order.courier, 'position') else None,
+        } if db_order.courier else None,
         "order_items": [
             {
                 "id": item.id,
@@ -1391,11 +1463,30 @@ async def update_order_status(
     db: Session = Depends(get_db)
 ):
     """Update order status"""
+    from models_sqlmodel import OrderHistory
+
     db_order = db.query(Order).filter(Order.id == order_id).first()
     if not db_order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    db_order.status = status_update.status
+    # Store old status for history
+    old_status = db_order.status
+    new_status = status_update.status
+
+    # Update order status
+    db_order.status = new_status
+
+    # Create history entry for status change
+    history_entry = OrderHistory(
+        order_id=order_id,
+        action="status_changed",
+        old_status=old_status,
+        new_status=new_status,
+        comment=f"Status changed from {old_status} to {new_status}",
+        changed_by_id=1  # TODO: Use actual user ID when auth is enabled
+    )
+    db.add(history_entry)
+
     db.commit()
     db.refresh(db_order)
 
@@ -1404,11 +1495,14 @@ async def update_order_status(
         "client_id": db_order.client_id,
         "recipient_id": db_order.recipient_id,
         "executor_id": db_order.executor_id,
+        "courier_id": db_order.courier_id,
         "status": db_order.status,
         "delivery_date": db_order.delivery_date,
         "delivery_address": db_order.delivery_address,
+        "delivery_time_range": db_order.delivery_time_range,
         "total_price": db_order.total_price,
         "comment": db_order.comment,
+        "notes": db_order.notes,
         "created_at": db_order.created_at,
         "client": {
             "id": db_order.client.id,
@@ -1437,6 +1531,13 @@ async def update_order_status(
             "city": db_order.executor.city if hasattr(db_order.executor, 'city') else None,
             "position": db_order.executor.position if hasattr(db_order.executor, 'position') else None,
         } if db_order.executor else None,
+        "courier": {
+            "id": db_order.courier.id,
+            "username": db_order.courier.username,
+            "email": db_order.courier.email,
+            "city": db_order.courier.city if hasattr(db_order.courier, 'city') else None,
+            "position": db_order.courier.position if hasattr(db_order.courier, 'position') else None,
+        } if db_order.courier else None,
         "order_items": [
             {
                 "id": item.id,
@@ -1763,4 +1864,32 @@ async def initialize_sample_clients(db: Session = Depends(get_db)):
         "products_created": len(created_products) if existing_products == 0 else 0,
         "orders_created": len(created_orders),
         "orders_total_value": sum(order.total_price for order in created_orders)
+    }
+
+
+# User management endpoints
+@router.get("/users")
+async def get_users(
+    position: Optional[str] = Query(None, description="Filter by position (Флорист, Курьер, Менеджер)"),
+    db: Session = Depends(get_db)
+):
+    """Get list of users, optionally filtered by position"""
+    query = db.query(User)
+
+    if position:
+        query = query.filter(User.position == position)
+
+    users = query.all()
+
+    return {
+        "users": [
+            {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+                "position": user.position,
+                "city": user.city
+            }
+            for user in users
+        ]
     }
